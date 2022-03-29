@@ -605,6 +605,9 @@ msg "compiler '$CC $CFLAGS'"
 
 [ $static = yes ] && passtolinker="$passtolinker -static"
 
+CFLAGS="$CFLAGS -flto -fno-strict-aliasing"
+passtolinker="$passtolinker -flto -fno-strict-aliasing"
+
 if [ "$passtolinker" = "" ]
 then
   LD="${CC}"
