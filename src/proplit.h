@@ -155,9 +155,58 @@ PROPAGATE_LITERAL (kissat * solver,
 	}
       else
 	{
+	  if (blocking_value > 0) {
+		/* previously: just ignore satisfied clause and continue with the next one */
+		// continue;
+
+		/* cadical_watch_sat 2021 solver hack; watch on other literal instead! */
+		/* get details of clause here */
+		const watch tail = *p++; /* we will not keep this clause, skip over tail */
+		const reference ref = tail.raw;
+		assert (ref < SIZE_STACK (solver->arena));
+		clause *const c = (clause *) (arena + ref);
+		unsigned *const lits = BEGIN_LITS (c);
+		const unsigned other = lits[0] ^ lits[1] ^ not_lit;
+		assert (lits[0] != lits[1]);
+		assert (VALID_INTERNAL_LITERAL (other));
+		assert (not_lit != other);
+		assert (lit != other);
+		/* kissat distributes clauses to be watched later lazily, as they are satisfied, that works here, too. */
+		if (!c->garbage)
+		{
+			/* only move the watched clause, if its not garbage */
+			const unsigned *const end_lits = lits + c->size;
+			if (other != blocking) { /* blocking lit does not have to be the other watched lit */
+				/* find location of blocking lit next */
+				unsigned *r;
+				for (r = lits + 2; r != end_lits; r++)
+				{
+					assert (VALID_INTERNAL_LITERAL (*r));
+					if (*r == blocking) break;
+				}
+				assert(r != end_lits); /* blocking needs to be present in the clause */
+				/* swap not_lit with blocking */
+				lits[0] = other;
+				lits[1] = blocking;
+				*r = not_lit;
+				/* add to watch list of lit blocking, use other as second literal */
+				kissat_delay_watching_large (solver, delayed,
+							blocking, other, ref);
+				/* drop the garbage clause from the list of the current literal */
+				q--;
+			} else {
+				/* blocking == other, do not re-watch, keep clause in list */
+				*q ++ = tail;
+			}
+		} else {
+			/* drop the garbage clause from the list of the current literal */
+			q--;
+		}
+		continue;
+	  }
+
 	  const watch tail = *q++ = *p++;
-	  if (blocking_value > 0)
-	    continue;
+
 	  const reference ref = tail.raw;
 	  assert (ref < SIZE_STACK (solver->arena));
 	  clause *const c = (clause *) (arena + ref);
