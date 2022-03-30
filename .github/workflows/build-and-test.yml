@@ -1,0 +1,31 @@
+name: Build and Test on Linux
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+
+  Linux:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Install Packages
+      run: sudo apt-get install zlib1g-dev make cmake picosat
+
+    - uses: actions/checkout@v1
+
+    - name: kissat build
+      run: ./configure --competition
+
+    - name: run make test
+      run: cd build && make test
+
+    - name: run make tissat
+      run: cd build && make tissat
+
+    - name: run tissat
+      run: cd build && ./tissat -b
+
