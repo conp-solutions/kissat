@@ -109,7 +109,7 @@ tar xf ../archive/kissat*
 mv kissat* kissat
 cd kissat
 ./configure --competition --$config --test
-make all || exit 1
+make all AR=gcc-ar || exit 1
 build/tissat || exit 1
 exec install -s build/kissat ../../bin/
 EOF
