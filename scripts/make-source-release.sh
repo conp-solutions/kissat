@@ -122,7 +122,7 @@ rm $DIR/scripts/build-and-test-all-configurations.sh || exit 1
 rm $DIR/scripts/make-source-release.sh || exit 1
 rm $DIR/scripts/prepare-competition.sh || exit 1
 rm $DIR/.gitignore || exit 1
-rm $DIR/.vimdir || exit 1
+rm -f $DIR/.vimdir || exit 1
 sed -i -e "s,ID=unknown,ID=$FULLID," $DIR/scripts/generate-build-header.sh
 msg "removing CNF files with more than ${LIMIT}k bytes"
 find $DIR/test/cnf -size +${LIMIT}k -exec rm {} \;
